@@ -80,3 +80,4 @@ An investigation of the Kali VM environment revealed a conflict with Burp Suite.
 
 ### Engineering Takeaway
 When using a penetration testing platform as a monitored endpoint, any tools that intercept or inspect network traffic (such as proxies or VPNs) must be configured to bypass the SIEM manager's IP address to ensure continuous monitoring and visibility.
+

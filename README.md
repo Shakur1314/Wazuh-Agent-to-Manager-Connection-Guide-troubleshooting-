@@ -4,7 +4,7 @@ This repository documents the troubleshooting steps taken to connect a **Kali Li
 ## 🛠 The Challenge
 In a virtual lab environment, IP addresses often change due to DHCP. This causes the Wazuh Agent to lose communication because it remains configured to look for an "old" Manager IP.
 
-## 🔍 Step-by-Step Troubleshooting
+##  Step-by-Step Troubleshooting
 
 ### 1. Connectivity Test
 Ensure the VMs can talk to each other.
@@ -52,6 +52,31 @@ Check the logs to confirm the connection is established:
 
     Target Line: INFO: (1410): Connected to the server
 
-✅ Final Results
+Final Results
 
 The agent status changed to Active in the Wazuh Dashboard. Security alerts, including File Integrity Monitoring (FIM) and Security Configuration Assessment (SCA), are now populating correctly.
+
+
+---
+
+## Maintenance Log: Resolving Agent Connection Issues (Post-Deployment)
+
+**Date:** January 13, 2026
+**Status:** Resolved
+
+### Incident Description
+Following the initial deployment of the lab, the Kali Linux agent status was reported as "Disconnected" in the Wazuh Dashboard. Although the wazuh-agent service was confirmed to be active and running on the endpoint, telemetry and heartbeats were not reaching the manager.
+
+### Troubleshooting and Root Cause
+An investigation of the Kali VM environment revealed a conflict with Burp Suite. 
+
+* **The Conflict:** Burp Suite was active and configured as a system-wide intercepting proxy. 
+* **The Impact:** Wazuh utilizes a specific encrypted protocol on port 1514 rather than standard HTTP/S. Burp Suite was unable to interpret or forward this traffic, causing a total communication break between the agent and the Ubuntu manager.
+
+### Resolution
+1. **Proxy Deactivation:** Disabled the Burp Suite interceptor and global proxy settings on the Kali VM.
+2. **Validation:** Executed `nc -zv <UBUNTU_IP> 1514` to verify a direct network path to the manager.
+3. **Recovery:** The agent successfully re-established a handshake with the manager and returned to "Active" status in the dashboard without requiring a service restart.
+
+### Engineering Takeaway
+When using a penetration testing platform as a monitored endpoint, any tools that intercept or inspect network traffic (such as proxies or VPNs) must be configured to bypass the SIEM manager's IP address to ensure continuous monitoring and visibility.
